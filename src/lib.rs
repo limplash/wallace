@@ -157,10 +157,11 @@ impl<V: WalValue, D: WalDelta<V>> Wallace<V, D> {
         self.maybe_compact()
     }
 
-    pub fn remove(&mut self, key: &[u8]) -> io::Result<()> {
+    pub fn remove(&mut self, key: &[u8]) -> io::Result<Option<V>> {
         self.wal_write(OpType::Remove, &key)?;
-        self.data.remove(key);
-        self.maybe_compact()
+        let ret = self.data.remove(key);
+        self.maybe_compact()?;
+        Ok(ret)
     }
 
     pub fn maybe_compact(&mut self) -> io::Result<()> {
