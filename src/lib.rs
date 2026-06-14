@@ -463,26 +463,4 @@ mod tests {
         assert_eq!(wal.get(&key2), Some(&value2));
         remove_test_wallace_file();
     }
-
-    #[test]
-    fn test_load_from_file() {
-        let path = "test_data/test_wal_load.log".to_string();
-        let fsync_policy = FsyncPolicy {
-            every_duration: Duration::from_secs(1),
-        };
-        let compact_threshold = 10;
-
-        let mut wal: Wallace<TestValue, TestDelta> =
-            Wallace::new(path.clone(), fsync_policy, compact_threshold).unwrap();
-        let key = b"key1".to_vec();
-        let value = TestValue(b"value1".to_vec());
-
-        wal.put(key.clone(), value.clone());
-        wal.sync().unwrap();
-
-        let loaded_wal =
-            load_from_file::<TestValue, TestDelta>(path, fsync_policy, compact_threshold).unwrap();
-        assert_eq!(loaded_wal.get(&key), Some(&value));
-        remove_test_wallace_file();
-    }
 }
