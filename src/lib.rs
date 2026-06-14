@@ -108,12 +108,19 @@ impl<V: WalValue, D: WalDelta<V>> Wallace<V, D> {
         };
         payload.extend_from_slice(&delta_bytes);
 
+        if !self.data.contains_key(key) {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "key not found for delta application",
+            ));
+        }
+
         self.wal_write(OpType::Delta, &payload)?;
 
         let value = self
             .data
             .get_mut(key)
-            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "key not found"))?;
+            .expect("key existence already checked above");
 
         delta.apply(value);
 
